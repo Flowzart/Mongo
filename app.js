@@ -3,15 +3,15 @@ const passport = require('passport');
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
-
+const config = require('./config');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const campsiteRouter = require('./routes/campsiteRouter')
 const promotionRouter = require('./routes/promotionRouter')
 const partnerRouter = require('./routes/partnerRouter')
 const uploadRouter = require('./routes/uploadRouter');
+const favoriteRouter = require('./routes/favoriteRouter');
 const mongoose = require('mongoose');
-const config = require('./config');
 
 const url = config.mongoUrl;
 const connect = mongoose.connect(url, {
@@ -26,15 +26,15 @@ connect.then(() => console.log('Connected correctly to server'),
 );
 
 var app = express();
-
-app.all('*', (req, res, next) => {
-  if (req.secure) {
-    return next()
-  } else {
-    console.log(`Redirecting to: https://${req.hostname}:${app.get('secPort')}${req.url}`);
-    res.redirect(301, `https://${req.hostname}:${app.get('secPort')}${req.url}`);
-  }
-})
+console.log("app.js");
+// app.all('*', (req, res, next) => {
+//   if (req.secure) {
+//     return next()
+//   } else {
+//     console.log(`Redirecting to: https://${req.hostname}:${app.get('secPort')}${req.url}`);
+//     res.redirect(301, `https://${req.hostname}:${app.get('secPort')}${req.url}`);
+//   }
+// })
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -47,15 +47,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('12345-67890-09876-54321'));
 
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
 app.use('/imageUpload', uploadRouter);
+app.use('/favorites', favoriteRouter);
 
 
 
